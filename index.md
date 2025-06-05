@@ -1,539 +1,123 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ErikTheHunter | Cyber Security Specialist</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
-        
-        :root {
-            --matrix-green: #00ff41;
-            --matrix-dark: #008f11;
-            --terminal-amber: #ffb000;
-            --cyber-blue: #00d4ff;
-            --cyber-purple: #bd00ff;
-            --danger-red: #ff0040;
-            --bg-black: #0a0a0a;
-            --bg-dark: #0d0d0d;
-            --text-primary: #00ff41;
-            --text-secondary: #00d4ff;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Fira Code', monospace;
-            background-color: var(--bg-black);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            cursor: crosshair;
-        }
-
-        /* Matrix rain background */
-        #matrix-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.1;
-        }
-
-        /* Scanlines effect */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                transparent 50%,
-                rgba(0, 255, 65, 0.03) 50%
-            );
-            background-size: 100% 4px;
-            z-index: 1;
-            pointer-events: none;
-            animation: scanlines 8s linear infinite;
-        }
-
-        @keyframes scanlines {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(10px); }
-        }
-
-        /* Terminal container */
-        .terminal {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Terminal header */
-        .terminal-header {
-            background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
-            border: 1px solid var(--matrix-green);
-            border-bottom: none;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-radius: 10px 10px 0 0;
-        }
-
-        .terminal-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .terminal-button {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .close { background-color: #ff5f56; }
-        .minimize { background-color: #ffbd2e; }
-        .maximize { background-color: #27c93f; }
-
-        .terminal-title {
-            flex: 1;
-            text-align: center;
-            font-size: 14px;
-            color: var(--matrix-green);
-            text-shadow: 0 0 10px var(--matrix-green);
-        }
-
-        /* Terminal body */
-        .terminal-body {
-            background-color: rgba(13, 13, 13, 0.95);
-            border: 1px solid var(--matrix-green);
-            border-top: none;
-            padding: 30px;
-            min-height: 80vh;
-            box-shadow: 0 0 40px rgba(0, 255, 65, 0.5);
-        }
-
-        /* Typing effect */
-        .typing-effect {
-            border-right: 3px solid var(--matrix-green);
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { border-color: transparent; }
-            50%, 100% { border-color: var(--matrix-green); }
-        }
-
-        /* Headers */
-        h1, h2, h3 {
-            margin: 20px 0;
-            text-shadow: 0 0 10px currentColor;
-        }
-
-        h1 {
-            font-size: 2.5em;
-            color: var(--matrix-green);
-            display: inline-block;
-            position: relative;
-        }
-
-        h1::before {
-            content: "root@erikthehunter:~# ";
-            color: var(--danger-red);
-            font-size: 0.8em;
-        }
-
-        h2 {
-            font-size: 1.8em;
-            color: var(--cyber-blue);
-            margin-top: 40px;
-        }
-
-        h2::before {
-            content: "[*] ";
-            color: var(--terminal-amber);
-        }
-
-        h3 {
-            font-size: 1.3em;
-            color: var(--cyber-purple);
-        }
-
-        h3::before {
-            content: ">> ";
-            color: var(--matrix-green);
-        }
-
-        /* Links */
-        a {
-            color: var(--cyber-blue);
-            text-decoration: none;
-            position: relative;
-            transition: all 0.3s;
-        }
-
-        a:hover {
-            color: var(--matrix-green);
-            text-shadow: 0 0 10px currentColor;
-        }
-
-        a::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--matrix-green);
-            transition: width 0.3s;
-        }
-
-        a:hover::after {
-            width: 100%;
-        }
-
-        /* Code blocks */
-        .code-block {
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--matrix-dark);
-            border-left: 4px solid var(--matrix-green);
-            padding: 20px;
-            margin: 20px 0;
-            font-family: 'Fira Code', monospace;
-            overflow-x: auto;
-            position: relative;
-        }
-
-        .code-block::before {
-            content: "TERMINAL";
-            position: absolute;
-            top: -10px;
-            left: 10px;
-            background: var(--bg-dark);
-            padding: 0 10px;
-            color: var(--matrix-green);
-            font-size: 12px;
-        }
-
-        /* Project cards */
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .project-card {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--matrix-dark);
-            padding: 25px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .project-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .project-card:hover::before {
-            left: 100%;
-        }
-
-        .project-card:hover {
-            border-color: var(--matrix-green);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
-            transform: translateY(-5px);
-        }
-
-        /* Skills */
-        .skills-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .skill-tag {
-            background: transparent;
-            border: 1px solid var(--matrix-dark);
-            padding: 5px 15px;
-            color: var(--matrix-green);
-            font-size: 14px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-
-        .skill-tag:hover {
-            border-color: var(--matrix-green);
-            text-shadow: 0 0 5px var(--matrix-green);
-            box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.2);
-        }
-
-        /* Glitch effect */
-        .glitch {
-            position: relative;
-            animation: glitch 2s infinite;
-        }
-
-        @keyframes glitch {
-            0%, 100% { text-shadow: 0 0 10px var(--matrix-green); }
-            20% { text-shadow: 3px 0 10px var(--danger-red), -3px 0 10px var(--cyber-blue); }
-            40% { text-shadow: -3px 0 10px var(--danger-red), 3px 0 10px var(--cyber-blue); }
-        }
-
-        /* ASCII art */
-        .ascii-art {
-            color: var(--matrix-green);
-            font-size: 12px;
-            line-height: 1.2;
-            margin: 20px 0;
-            white-space: pre;
-            font-family: monospace;
-        }
-
-        /* Alert box */
-        .alert {
-            border: 1px solid var(--danger-red);
-            background: rgba(255, 0, 64, 0.1);
-            padding: 15px;
-            margin: 20px 0;
-            position: relative;
-            color: var(--danger-red);
-        }
-
-        .alert::before {
-            content: "[!] WARNING: ";
-            font-weight: bold;
-        }
-
-        /* Success box */
-        .success {
-            border: 1px solid var(--matrix-green);
-            background: rgba(0, 255, 65, 0.1);
-            padding: 15px;
-            margin: 20px 0;
-            color: var(--matrix-green);
-        }
-
-        .success::before {
-            content: "[+] SUCCESS: ";
-            font-weight: bold;
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            animation: loading 1.5s infinite;
-        }
-
-        @keyframes loading {
-            0% { content: "."; }
-            33% { content: ".."; }
-            66% { content: "..."; }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .terminal-body {
-                padding: 20px;
-            }
-            
-            h1 { font-size: 1.8em; }
-            h2 { font-size: 1.4em; }
-            h3 { font-size: 1.1em; }
-        }
-    </style>
-</head>
-<body>
-    <canvas id="matrix-bg"></canvas>
-    
-    <div class="terminal">
-        <div class="terminal-header">
-            <div class="terminal-buttons">
-                <div class="terminal-button close"></div>
-                <div class="terminal-button minimize"></div>
-                <div class="terminal-button maximize"></div>
-            </div>
-            <div class="terminal-title">ErikTheHunter@CyberSec:~</div>
-        </div>
-        
-        <div class="terminal-body">
-            <div class="ascii-art">
- _____ ____  ___ _  _______ _   _ _____ _   _ _   _ _   _ _____ _____ ____  
-| ____|  _ \|_ _| |/ /_   _| | | | ____| | | | | | | \ | |_   _| ____|  _ \ 
-|  _| | |_) || || ' /  | | | |_| |  _| | |_| | | | |  \| | | | |  _| | |_) |
-| |___|  _ < | || . \  | | |  _  | |___|  _  | |_| | |\  | | | | |___|  _ < 
-|_____|_| \_\___|_|\_\ |_| |_| |_|_____|_| |_|\\___/|_| \_| |_| |_____|_| \_\\
-</div>
-
-            <h1 class="glitch">Welcome to My Cyber Domain</h1>
-            <div class="typing-effect"></div>
-            
-            <div class="success">
-                Authentication successful. Access granted to cybersecurity portfolio.
-            </div>
-
-            <div class="code-block">
-$ whoami
-ErikTheHunter - Cybersecurity Specialist
-
-$ cat /etc/interests
-[*] Digital Forensics
-[*] Network Security
-[*] Incident Response
-[*] Threat Intelligence
-[*] SOC Operations
-[*] Risk & Compliance
-
-$ ls -la /home/erikthehunter/skills/
-drwxr-xr-x  Network_Forensics/
-drwxr-xr-x  Incident_Response/
-drwxr-xr-x  Digital_Forensics/
-drwxr-xr-x  Vulnerability_Assessment/
-drwxr-xr-x  Security_Analysis/
-drwxr-xr-x  Penetration_Testing/
-</div>
-
-            <h2>Active Security Projects</h2>
-            
-            <div class="project-grid">
-                <div class="project-card" onclick="window.open('https://github.com/ErikTheHunter/Network-Security-and-forensics.', '_blank')">
-                    <h3>Network Security & Forensics</h3>
-                    <div class="code-block">
-$ nmap -sS -sV -O target.domain
-$ tcpdump -i eth0 -w capture.pcap
-$ wireshark -r capture.pcap
-                    </div>
-                    <p>Advanced network security analysis including packet inspection, traffic analysis, and forensic investigation of network-based attacks.</p>
-                    <div class="skills-container">
-                        <span class="skill-tag">Wireshark</span>
-                        <span class="skill-tag">tcpdump</span>
-                        <span class="skill-tag">Snort</span>
-                    </div>
-                </div>
-
-                <div class="project-card" onclick="window.open('https://github.com/ErikTheHunter/Incidence-Response-and-Forensics', '_blank')">
-                    <h3>Incident Response & Forensics</h3>
-                    <div class="code-block">
-$ volatility -f memory.dump imageinfo
-$ autopsy case.img
-$ grep -r "malware" /var/log/
-                    </div>
-                    <p>Real-world incident response scenarios with comprehensive digital forensics, malware analysis, and threat hunting methodologies.</p>
-                    <div class="skills-container">
-                        <span class="skill-tag">Volatility</span>
-                        <span class="skill-tag">Autopsy</span>
-                        <span class="skill-tag">SIFT</span>
-                    </div>
-                </div>
-
-                <div class="project-card" onclick="window.open('https://github.com/ErikTheHunter/Security-Risk-and-Compliance', '_blank')">
-                    <h3>Security Risk & Compliance</h3>
-                    <div class="code-block">
-$ ./risk_assessment.sh --framework NIST
-$ compliance_check --standard ISO27001
-$ audit_report --output pdf
-                    </div>
-                    <p>Comprehensive risk assessments and compliance implementations across NIST, ISO 27001, and other security frameworks.</p>
-                    <div class="skills-container">
-                        <span class="skill-tag">NIST CSF</span>
-                        <span class="skill-tag">ISO 27001</span>
-                        <span class="skill-tag">GDPR</span>
-                    </div>
-                </div>
-            </div>
-
-            <h2>System Capabilities</h2>
-            
-            <div class="code-block">
-$ cat /proc/cpuinfo | grep "model name"
-model name : Masters-level Cybersecurity Experience
-
-$ free -h
-              total        used        free      shared
-Knowledge     ∞           95%         5%        100%
-Skills        High        Active      Growing   Shared
-Experience    Practical   Applied     Expanding Open
-
-$ uname -a
-ErikTheHunter 5.0.0-security #1 SMP PREEMPT CyberSec GNU/Linux
-</div>
-
-            <h2>Exploit Database</h2>
-            
-            <div class="alert">
-                Authorized access only. All activities are monitored and logged.
-            </div>
-
-            <div class="skills-container">
-                <span class="skill-tag">Buffer Overflow</span>
-                <span class="skill-tag">SQL Injection</span>
-                <span class="skill-tag">XSS Prevention</span>
-                <span class="skill-tag">Privilege Escalation</span>
-                <span class="skill-tag">Reverse Engineering</span>
-                <span class="skill-tag">Cryptography</span>
-                <span class="skill-tag">OSINT</span>
-                <span class="skill-tag">Social Engineering</span>
-                <span class="skill-tag">Zero-Day Research</span>
-            </div>
-
-            <h2>Connection Established</h2>
-            
-            <div class="code-block">
-$ ssh erikthehunter@github.com
-Connecting to github.com...
-Authentication method: public key
-Connected successfully.
-
-$ git clone https://github.com/ErikTheHunter/
-Cloning into 'ErikTheHunter'...
-remote: Enumerating objects: 100%
-remote: Total projects: 3 (and counting...)
-Receiving objects: 100% complete
-</div>
-
-            <p>
-                <a href="https://github.com/ErikTheHunter" class="glitch">[ESTABLISH SECURE CONNECTION]</a>
-            </p>
-
-            <div class="success">
-                More exploits... I mean projects... coming soon. Stay vigilant.
-            </div>
-
-            <div class="code-block">
-$ exit
-logout
-Connection to ErikTheHunter closed.
-</div>
-        </div>
-    </div>
-
-    <script>
-        // Matrix rain effect
-        const canvas = document.getElementById('matrix-bg');
-        const ctx = canvas.getContext('2d');
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const matrix =
+---
+layout: default
+---
+
+Text can be **bold**, _italic_, ~~strikethrough~~ or `keyword`.
+
+[Link to another page](./another-page.html).
+
+There should be whitespace between paragraphs.
+
+There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.
+
+# Header 1
+
+This is a normal paragraph following a header. GitHub is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.
+
+## Header 2
+
+> This is a blockquote following a header.
+>
+> When something is important enough, you do it even if the odds are not in your favor.
+
+### Header 3
+
+```js
+// Javascript code with syntax highlighting.
+var fun = function lang(l) {
+  dateformat.i18n = require('./lang/' + l)
+  return true;
+}
+```
+
+```ruby
+# Ruby code with syntax highlighting
+GitHubPages::Dependencies.gems.each do |gem, version|
+  s.add_dependency(gem, "= #{version}")
+end
+```
+
+#### Header 4
+
+*   This is an unordered list following a header.
+*   This is an unordered list following a header.
+*   This is an unordered list following a header.
+
+##### Header 5
+
+1.  This is an ordered list following a header.
+2.  This is an ordered list following a header.
+3.  This is an ordered list following a header.
+
+###### Header 6
+
+| head1        | head two          | three |
+|:-------------|:------------------|:------|
+| ok           | good swedish fish | nice  |
+| out of stock | good and plenty   | nice  |
+| ok           | good `oreos`      | hmm   |
+| ok           | good `zoute` drop | yumm  |
+
+### There's a horizontal rule below this.
+
+* * *
+
+### Here is an unordered list:
+
+*   Item foo
+*   Item bar
+*   Item baz
+*   Item zip
+
+### And an ordered list:
+
+1.  Item one
+1.  Item two
+1.  Item three
+1.  Item four
+
+### And a nested list:
+
+- level 1 item
+  - level 2 item
+  - level 2 item
+    - level 3 item
+    - level 3 item
+- level 1 item
+  - level 2 item
+  - level 2 item
+  - level 2 item
+- level 1 item
+  - level 2 item
+  - level 2 item
+- level 1 item
+
+### Small image
+
+![Octocat](https://github.githubassets.com/images/icons/emoji/octocat.png)
+
+### Large image
+
+![Branching](https://guides.github.com/activities/hello-world/branching.png)
+
+
+### Definition lists can be used with HTML syntax.
+
+<dl>
+<dt>Name</dt>
+<dd>Godzilla</dd>
+<dt>Born</dt>
+<dd>1952</dd>
+<dt>Birthplace</dt>
+<dd>Japan</dd>
+<dt>Color</dt>
+<dd>Green</dd>
+</dl>
+
+```
+Long, single-line code blocks should not wrap. They should horizontally scroll if they are too long. This line should be long enough to demonstrate this.
+```
+
+```
+The final element.
+```
